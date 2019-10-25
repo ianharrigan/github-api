@@ -1,6 +1,7 @@
 package github.api3;
 
 import haxe.Http;
+import haxe.Json;
 import haxe.io.BytesOutput;
 import promhx.Deferred;
 import promhx.Promise;
@@ -36,6 +37,12 @@ class HttpClient {
         var http = new Http(url);
         setHeaders(http, credentials);
         http.onError = function(msg) {
+            if (http.responseData != null && http.responseData != null && StringTools.startsWith(http.responseData, "{")) {
+                var jsonError = Json.parse(http.responseData);
+                if (jsonError.message != null) {
+                    msg = jsonError.message;
+                }
+            }
             result.errorMessage = msg;
             d.resolve(result);
         }
